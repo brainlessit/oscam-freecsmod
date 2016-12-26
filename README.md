@@ -15,9 +15,9 @@
 ## oscam-freecsmod+ osemu
 
 # wget http://raw.githubusercontent.com/brainlessit/oscam-freecsmod/master/oscam-freecsmod-osemu.patch
-# svn checkout http://www.streamboard.tv/svn/oscam/trunk oscam-freecsmod
-# cd oscam-freecsmod
+# svn checkout http://www.streamboard.tv/svn/oscam/trunk oscam-freecsmod-osemu
+# cd oscam-freecsmod-osemu
 # svn patch ../oscam-freecsmod-osemu.patch
 
-## compilare oscam-freecsmod 
+## compilare oscam-freecsmod-osemu 
 # make
