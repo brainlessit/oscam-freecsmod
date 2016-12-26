@@ -11,3 +11,13 @@
 ## compilare oscam-freecsmod 
 # make
 
+
+## oscam-freecsmod+ osemu
+
+# wget http://raw.githubusercontent.com/brainlessit/oscam-freecsmod/master/oscam-freecsmod-osemu.patch
+# svn checkout http://www.streamboard.tv/svn/oscam/trunk oscam-freecsmod
+# cd oscam-freecsmod
+# svn patch ../oscam-freecsmod-osemu.patch
+
+## compilare oscam-freecsmod 
+# make
