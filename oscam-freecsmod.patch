@@ -24,7 +24,7 @@ Index: Makefile.extra
 -i386-pc-linux-pcsc-libusb: pcsc-libusb
 -libusb-pcsc: pcsc-libusb
 +x64: simple
-+tutti: e1 e1-uclib e2 e2-arm android-freecs android-arm sh4
++tutti: simple e1 e1-uclib e2 e2-arm android-freecs android-arm sh4
 +tutti-plugin: sh4-plugin e2-plugin e2-arm-plugin
  
 -libusb:
