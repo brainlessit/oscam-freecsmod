@@ -2,7 +2,7 @@ Index: Makefile.extra
 ===================================================================
 --- Makefile.extra	(revisione 10005)
 +++ Makefile.extra	(copia locale)
-@@ -1,89 +1,201 @@
+@@ -1,98 +1,214 @@
 -i386-pc-linux: simple
 -i386-pc-linux-debug: debug
 -i386-pc-freebsd: simple
@@ -13,7 +13,7 @@ Index: Makefile.extra
 -tuxbox: cross-powerpc-tuxbox-linux
 -tripledragon: cross-powerpc-405-linux
 -win: cross-i386-pc-cygwin
--cygwin: i386-pc-cygwin
+ cygwin: i386-pc-cygwin
 -macosx: macosx-native
 -linux-pcsc: i386-pc-linux-pcsc
 -dm500: cross-powerpc-tuxbox-linux
@@ -24,7 +24,7 @@ Index: Makefile.extra
 -i386-pc-linux-pcsc-libusb: pcsc-libusb
 -libusb-pcsc: pcsc-libusb
 +x64: simple
-+tutti: e1 e1-uclib e2 e2-arm android-freecs android-arm sh4
++tutti: simple e1 e1-uclib e2 e2-arm android-freecs android-arm sh4
 +tutti-plugin: sh4-plugin e2-plugin e2-arm-plugin
  
 -libusb:
@@ -251,7 +251,21 @@ Index: Makefile.extra
  cross-i386-pc-cygwin:
  	$(MAKE) --no-print-directory \
  		CROSS=i686-pc-cygwin- \
-@@ -167,125 +279,3 @@
+-		EXTRA_FLAGS="-static" \
++		EXTRA_FLAGS="-static -DCYGWIN_FREECS" \
++		CONF_DIR=./ \
+ 		$(MAKEFLAGS)
+ 
+ i386-pc-cygwin:
+ 	$(MAKE) --no-print-directory \
+-		EXTRA_FLAGS="-I /tmp/include" \
++		CROSS= \
++		EXTRA_FLAGS="-I /tmp/include -DCYGWIN_FREECS" \
++		CONF_DIR=./ \
+ 		$(MAKEFLAGS)
+ 
+ i386-pc-cygwin-pcsc:
+@@ -167,125 +283,3 @@
  cross-mips-router-linux-uclibc931: cross-mips-router-linux-uclibc930
  cross-mipsel-fonera2: cross-mips-router-linux-uclibc
  
@@ -381,7 +395,15 @@ Index: module-webif.c
 ===================================================================
 --- module-webif.c	(revisione 10005)
 +++ module-webif.c	(copia locale)
-@@ -29,6 +29,7 @@
+@@ -1,4 +1,7 @@
+ #include "globals.h"
++#ifdef CYGWIN_FREECS
++#include <windows.h>
++#endif 
+ 
+ #ifdef WEBIF
+ //
+@@ -29,6 +32,7 @@
  #include "oscam-time.h"
  #include "oscam-work.h"
  
@@ -389,7 +411,7 @@ Index: module-webif.c
  extern struct s_cardreader cardreaders[CS_MAX_MOD];
  extern char cs_confdir[];
  extern uint32_t ecmcwcache_size;
-@@ -73,7 +74,8 @@
+@@ -73,7 +77,8 @@
  #define MNU_SCRIPT 8
  #define MNU_SHUTDOWN 9
  #define MNU_LIVELOG 10
@@ -399,7 +421,7 @@ Index: module-webif.c
  /* constants for submenuactivating */
  #define MNU_CFG_GLOBAL 0
  #define MNU_CFG_LOADBAL 1
-@@ -5461,6 +5463,7 @@
+@@ -5461,6 +5466,7 @@
  	}
  }
  
@@ -407,16 +429,16 @@ Index: module-webif.c
  static char *send_oscam_script(struct templatevars * vars, struct uriparams * params)
  {
  	setActiveMenu(vars, MNU_SCRIPT);
-@@ -5469,7 +5472,7 @@
+@@ -5469,7 +5475,7 @@
  	if(!cfg.http_readonly && cfg.http_script)
  	{
  		struct dirent **namelist;
 -		int count, i;
-+		int count, i, is_script = 0;
++		int count, i, is_script = 0, is_windows = 0;
  		count = scandir(cfg.http_script, &namelist, 0, alphasort );
  		if( count >= 0 )
  		{
-@@ -5478,6 +5481,7 @@
+@@ -5478,6 +5484,7 @@
  				if(is_ext(namelist[i]->d_name, ".script") || is_ext(namelist[i]->d_name, ".sh"))
  				{
  					tpl_printf(vars, TPLAPPEND, "SCRIPTOPTIONS", "<option value=\"script.html?scriptname=%s\">%s</option>\n",namelist[i]->d_name,namelist[i]->d_name);
@@ -424,7 +446,7 @@ Index: module-webif.c
   				}
  				free( namelist[i] );
  			}
-@@ -5485,6 +5489,7 @@
+@@ -5485,23 +5492,72 @@
  		}
  
  		char *scriptname = getParam(params, "scriptname");
@@ -432,8 +454,21 @@ Index: module-webif.c
  		char *result = "not executable";
  		char system_str[256];
  		struct stat s;
-@@ -5497,11 +5502,32 @@
- 				if(s.st_mode & S_IXUSR)
++#ifdef CYGWIN_FREECS
++		snprintf(system_str, 256, "start /c C:\\winfreecsD\\bash.exe %s/%s", cfg.http_script, scriptname);
++		is_windows = 1;
++#else
+ 		snprintf(system_str, 256, "%s/%s", cfg.http_script, scriptname);
++#endif
+ 
+-		if(!stat(system_str,&s))
++		if(!stat(system_str,&s) || is_windows == 1)
+ 		{
+-			if(s.st_mode & S_IFREG)
++			if((s.st_mode & S_IFREG) || is_windows == 1)
+ 			{
+-				if(s.st_mode & S_IXUSR)
++				if((s.st_mode & S_IXUSR) || is_windows == 1)
  				{
  					int32_t rc = 0;
 -					rc = system(system_str);
@@ -451,13 +486,35 @@ Index: module-webif.c
 +					  	strcat(system_str, scriptparam);
 +					  }
 +            
-+					  fp = popen(system_str,"r");
++#ifdef CYGWIN_FREECS
++							strcat(system_str, " > outcmd");
++							SHELLEXECUTEINFO ShExecInfo = {0};
++							ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
++							ShExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
++							ShExecInfo.hwnd = HWND_DESKTOP;
++							ShExecInfo.lpVerb = "open";
++							ShExecInfo.lpFile = "C:\\Windows\\system32\\cmd.exe";		
++							ShExecInfo.lpParameters = system_str;	
++							ShExecInfo.lpDirectory = "C:\\winfreecsD\\";
++							ShExecInfo.nShow = SW_HIDE;
++							ShExecInfo.hInstApp = NULL;	
++							ShellExecuteEx(&ShExecInfo);
++							WaitForSingleObject(ShExecInfo.hProcess,INFINITE);
++							
++							fp = fopen("C:\\winfreecsD\\outcmd", "r");
++#else
++							fp = popen(system_str,"r");
++#endif
 +            
 +					  while (fgets(buf, sizeof(buf), fp) != NULL) {
 +					  	tpl_addVar(vars, TPLAPPEND, "SCRIPTRESULTOUT", buf);
 +					  }
 +            
-+					  rc = pclose(fp)/256;
++#ifdef CYGWIN_FREECS
++							rc = fclose(fp);
++#else
++							rc = pclose(fp)/256;
++#endif
 +            }
 +          else
 +          	{
@@ -470,7 +527,7 @@ Index: module-webif.c
  					tpl_printf(vars, TPLAPPEND, "CODE", "returncode: %d", rc);
  					tpl_printf(vars, TPLADD, "SCRIPTNAME", "scriptname: %s", scriptname);
  					tpl_printf(vars, TPLADD, "SCRIPTRESULT", "scriptresult: %s", result);
-@@ -5509,6 +5535,7 @@
+@@ -5509,6 +5565,7 @@
  				else
  				{
  					tpl_printf(vars, TPLADD, "SCRIPTRESULT", "scriptresult: %s", result);
@@ -478,7 +535,7 @@ Index: module-webif.c
  				}
  			}
  		}
-@@ -5516,6 +5543,7 @@
+@@ -5516,6 +5573,7 @@
  		{
  			result = "not found";
  			tpl_printf(vars, TPLADD, "SCRIPTRESULT", "scriptresult: %s", result);
@@ -486,7 +543,7 @@ Index: module-webif.c
  		}
  		
  	}
-@@ -5522,6 +5550,7 @@
+@@ -5522,6 +5580,7 @@
  	return tpl_getTpl(vars, "SCRIPT");
  }
  
@@ -494,7 +551,7 @@ Index: module-webif.c
  static char *send_oscam_scanusb(struct templatevars * vars)
  {
  	setActiveMenu(vars, MNU_READERS);
-@@ -6863,8 +6892,203 @@
+@@ -6863,8 +6922,239 @@
  		return tpl_getTpl(vars, "PREAUTOCONF");
  	}
  }
@@ -522,7 +579,7 @@ Index: module-webif.c
 +{"Help di freecsD, consultalo se hai dubbi", "freecsd.html?scriptname=freecsD&scriptparam=-h", "Help"}, 
 +{"Varie informazioni utili", "freecsd.html?scriptname=freecsD&scriptparam=tools -d", "Info"},
 +{"none", "none", "none"},
-+{"Fill di emergenza. Se avete oscam popolata usate questa anzichè FillIfill unstable", "freecsd.html?scriptname=freecsD&scriptparam=-y0", "Forza handler[Fill di emergenza]"},
++{"Fill di emergenza. Se avete oscam popolata usate questa anzichè FillIfill unstable", "freecsd.html?scriptname=freecsD&scriptparam=-y0", "Forza handler [Fill di emergenza]"},
 +{"none", "none", "none"},
 +{"Aggiunge alcuni nomi eliminati dai DNS servers in /etc/hosts", "freecsd.html?scriptname=freecsD-tools&scriptparam=-p", "Patch /etc/hosts"},
 +{"Popola con la lista stabile di generatori. Da usare solo per popolare la prima volta o quando viene comunicato dai responsabili del progetto", "freecsd.html?scriptname=freecsD&scriptparam=-a", "Fill stable"},
@@ -535,22 +592,31 @@ Index: module-webif.c
 +#ifndef FOR_PLUGIN
 +//not needed by enigma2 plugin needed by others
 +{"Controlla se possibile usare freecsD, comunica eventuali problemi e crea un cronjob", "freecsd.html?scriptname=freecsD&scriptparam=-i", "Inizializza"},
++#ifndef CYGWIN_FREECS
 +{"Crea il cronjob con -sy0. Equivale a un fill pulito eseguito ogni 6 minuti", "freecsd.html?scriptname=[newi]", "cronjob con -sy0"},
 +{"Verifica lo stato dei cronjobs (crontab -l)", "freecsd.html?scriptname=crontab&scriptparam=-l", "Verifica cron"},
++#endif
 +#else
 +// needed by enigma2 plugin not needed by others
 +{"Controlla lo stato di oscam-freecsmod e freecsD", "freecsd.html?scriptname=[status]", "Stato"},
 +#endif
 +{"none", "none", "none"},
++#ifndef CYGWIN_FREECS
 +{"Installa freecsD in /usr/bin (/data/local/freecs/bin su android)", "freecsd.html?scriptname=[install]", "Installa freecsD"}, 
 +{"Installa freecsD-tools in /usr/bin (/data/local/freecs/bin su android)", "freecsd.html?scriptname=[install-tools]", "Installa tools"},
++#endif
 +{"none", "none", "none"},
 +#ifdef FOR_PLUGIN
 +{"Aggiorna oscam-freecsmod", "freecsd.html?scriptname=[install-oscam]", "Aggiorna oscam"},
 +#endif
 +#ifndef ANDROID_FREECS
++#ifdef CYGWIN_FREECS
++{"Aggiorna freecsD all'ultima versione", "freecsd.html?scriptname=freecsD-U", "Aggiorna freecsD"},
++{"Aggiorna freecsD-tools all'ultima versione", "freecsd.html?scriptname=freecsD-tools-U", "Aggiorna freecsD-tools"},
++#else
 +{"Aggiorna freecsD all'ultima versione", "freecsd.html?scriptname=freecsD&scriptparam=-U", "Aggiorna freecsD"},
 +{"Aggiorna freecsD-tools all'ultima versione", "freecsd.html?scriptname=freecsD&scriptparam=tools -U", "Aggiorna freecsD-tools"},
++#endif
 +#endif
 +{"none", "none", "none"},
 +#ifndef FOR_PLUGIN_DISABLED
@@ -590,8 +656,8 @@ Index: module-webif.c
 +		tpl_addVar(vars, TPLAPPEND, "SCRIPTRESULTOUT", "Oscam freecsmod by <a href=\"http://progettofreecs.altervista.org\">progettofreecs</a>\nPer maggiori informazioni visita il forum <a href=\"http://www.cardsharing.ws/cardsharing/forumdisplay.php/192-FREECS-amp-amp-CO\">cardsharing.ws</a>");
 +		return tpl_getTpl(vars, "FREECSD");
 +	}
-+	if (strcmp (scriptname, "freecsD") && strcmp (scriptname, "freecsD-tools") && strcmp (scriptname, "crontab") && strcmp (scriptname, "[newi]") && strcmp (scriptname, "[install]") && strcmp (scriptname, "[install-tools]") && strcmp (scriptname, "[install-oscam]") && strcmp (scriptname, "[status]") && strcmp (scriptname, "[restart-freecsD]") && strcmp (scriptname, "[restart-oscam]")) {
-+		tpl_addVar(vars, TPLAPPEND, "SCRIPTRESULTOUT", "Impossibile eseguire il comando\nAmmesso solo freecsD per ragioni di sucurezza\n\n");
++	if (strcmp (scriptname, "freecsD") && strcmp (scriptname, "freecsD-U") && strcmp (scriptname, "freecsD-tools") && strcmp (scriptname, "freecsD-tools-U") && strcmp (scriptname, "crontab") && strcmp (scriptname, "[newi]") && strcmp (scriptname, "[install]") && strcmp (scriptname, "[install-tools]") && strcmp (scriptname, "[install-oscam]") && strcmp (scriptname, "[status]") && strcmp (scriptname, "[restart-freecsD]") && strcmp (scriptname, "[restart-oscam]")) {
++		tpl_addVar(vars, TPLAPPEND, "SCRIPTRESULTOUT", "Impossibile eseguire il comando\nAmmesso solo freecsD per ragioni di sicurezza\n\n");
 +		return tpl_getTpl(vars, "FREECSD");
 +	}
 +	if (strcmp (scriptname, "[newi]")) {
@@ -666,7 +732,11 @@ Index: module-webif.c
 +#ifdef ANDROID_FREECS
 +	snprintf(system_str, sizeof(system_str), "sh /data/local/freecs/bin/%s", scriptname);
 +#else
++#ifdef CYGWIN_FREECS
++	snprintf(system_str, sizeof(system_str), "start /c C:\\winfreecsD\\bash.exe %s", scriptname);
++#else
 +	snprintf(system_str, sizeof(system_str), "%s", scriptname);
++#endif
 +#endif
 +	}
 +
@@ -680,13 +750,36 @@ Index: module-webif.c
 +		strcat(system_str, scriptparam);
 +	}
 +
-+	fp = popen(system_str,"r");
++#ifdef CYGWIN_FREECS
++	strcat(system_str, " > outcmd");
 +
-+	while (fgets(buf, sizeof(buf), fp) != NULL) {
++	SHELLEXECUTEINFO ShExecInfo = {0};
++	ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
++	ShExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
++	ShExecInfo.hwnd = HWND_DESKTOP;
++	ShExecInfo.lpVerb = "open";
++	ShExecInfo.lpFile = "C:\\Windows\\system32\\cmd.exe";		
++	ShExecInfo.lpParameters = system_str;	
++	ShExecInfo.lpDirectory = "C:\\winfreecsD\\";
++	ShExecInfo.nShow = SW_HIDE;
++	ShExecInfo.hInstApp = NULL;	
++	ShellExecuteEx(&ShExecInfo);
++	WaitForSingleObject(ShExecInfo.hProcess,INFINITE);
++
++	fp = fopen("C:\\winfreecsD\\outcmd", "r");
++#else
++	fp = popen(system_str,"r");
++#endif
++
++	while(fgets(buf, sizeof(buf), fp) != NULL) {
 +		tpl_addVar(vars, TPLAPPEND, "SCRIPTRESULTOUT", buf);
 +	}
 +
++#ifdef CYGWIN_FREECS
++	rc = fclose(fp);
++#else
 +	rc = pclose(fp)/256;
++#endif
 +
 +	tpl_printf(vars, TPLAPPEND, "CODE", "returncode: %d", rc);
 +	tpl_printf(vars, TPLADD, "SCRIPTNAME", "%s", scriptname);
@@ -698,7 +791,7 @@ Index: module-webif.c
  static int8_t check_httpip(IN_ADDR_T addr)
  {
  	int8_t i = 0;
-@@ -7111,6 +7335,7 @@
+@@ -7111,6 +7401,7 @@
  			"/ghttp.html",
  			"/logpoll.html",
  			"/jquery.js",
@@ -706,7 +799,7 @@ Index: module-webif.c
  		};
  
  		int32_t pagescnt = sizeof(pages) / sizeof(char *); // Calculate the amount of items in array
-@@ -7504,9 +7729,12 @@
+@@ -7504,9 +7795,12 @@
  			case 29:
  				result = send_oscam_logpoll(vars, &params);
  				break;
@@ -723,7 +816,7 @@ Index: module-webif.c
  			if(pgidx != 19 && pgidx != 20 && pgidx != 21 && pgidx != 27) { cs_writeunlock(&http_lock); }
 Index: webif/freecsd/freecsd.html
 ===================================================================
---- webif/freecsd/freecsd.html	(revisione 0)
+--- webif/freecsd/freecsd.html	(nonexistent)
 +++ webif/freecsd/freecsd.html	(copia locale)
 @@ -0,0 +1,143 @@
 +##TPLHEADER##
@@ -1450,3 +1543,54 @@ Index: webif/pages_index.txt
  USERNOICON                    userconfig/userconfig_usernoicon.html
 +
 +FREECSD			      freecsd/freecsd.html	
+Index: webif/script/script.html
+===================================================================
+--- webif/script/script.html	(revisione 10005)
++++ webif/script/script.html	(copia locale)
+@@ -1,15 +1,37 @@
+ ##TPLHEADER##
+ ##TPLMENU##
+-		<DIV ID="subnav">
+-			<UL ID="nav"><LI></LI></UL>
+-		</DIV>
++	<DIV ID="subnav">
++		<UL ID="nav"><LI></LI></UL>
++	</DIV>
+ ##TPLMESSAGE##
+-		<script type="text/javascript">function runscript(){var e=document.getElementById("scriptselect");var URL=e.options[e.selectedIndex].value;window.location.href=URL;}</script>
++	<script type="text/javascript">
++		function runscript() {
++			var e=document.getElementById("scriptselect");
++			var URL=e.options[e.selectedIndex].value;
++			if(URL) {
++				var p=document.getElementById("scriptparam").value;
++				if(p) {
++					var param=p.trim();
++					if(param) URL=URL+"&scriptparam="+param;
++				}
++				window.location.href=URL;
++			}
++			else {
++				return;
++			}
++		}
++	</script>
+ 		<P ID="filename">OSCam execute script:</P>
+-		<DIV ID="otherdropdown">
+-			<select ID="scriptselect" name="action" size="1" onChange="runscript()">
++	<DIV ID="otherdropdown">
++		<select ID="scriptselect" name="action" size="1">
+ ##SCRIPTOPTIONS##
+-			</select>
+-		</DIV>
+-		<P ID="filesubmit">##SCRIPTNAME## ##SCRIPTRESULT## ##CODE##</P>
++		</select>
++		<input id="scriptparam" type="text" name="scriptparam" value="" class="short" title="Script Parameters (optional)">
++		<input type="button" onclick="runscript()" value="Run Script" title="Run Script">
++	</DIV>
++		<P ID="filesubmit">##SCRIPTNAME## ##CODE##</P>
++	<DIV CLASS="extract">
++		<P>Script Output: (if available)</P>
++		<PRE CLASS="script">##SCRIPTRESULTOUT##</PRE>
++	</DIV>
+ ##TPLFOOTER##
