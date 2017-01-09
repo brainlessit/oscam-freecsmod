@@ -155,7 +155,7 @@ Index: Makefile.extra
 ===================================================================
 --- Makefile.extra	(revisione 11293)
 +++ Makefile.extra	(copia locale)
-@@ -1,89 +1,201 @@
+@@ -1,98 +1,214 @@
 -i386-pc-linux: simple
 -i386-pc-linux-debug: debug
 -i386-pc-freebsd: simple
@@ -166,7 +166,7 @@ Index: Makefile.extra
 -tuxbox: cross-powerpc-tuxbox-linux
 -tripledragon: cross-powerpc-405-linux
 -win: cross-i386-pc-cygwin
--cygwin: i386-pc-cygwin
+ cygwin: i386-pc-cygwin
 -macosx: macosx-native
 -linux-pcsc: i386-pc-linux-pcsc
 -dm500: cross-powerpc-tuxbox-linux
@@ -404,7 +404,21 @@ Index: Makefile.extra
  cross-i386-pc-cygwin:
  	$(MAKE) --no-print-directory \
  		CROSS=i686-pc-cygwin- \
-@@ -167,135 +279,3 @@
+-		EXTRA_FLAGS="-static" \
++		EXTRA_FLAGS="-static -DCYGWIN_FREECS" \
++		CONF_DIR=./ \
+ 		$(MAKEFLAGS)
+ 
+ i386-pc-cygwin:
+ 	$(MAKE) --no-print-directory \
+-		EXTRA_FLAGS="-I /tmp/include" \
++		CROSS= \
++		EXTRA_FLAGS="-I /tmp/include -DCYGWIN_FREECS" \
++		CONF_DIR=./ \
+ 		$(MAKEFLAGS)
+ 
+ i386-pc-cygwin-pcsc:
+@@ -167,135 +283,3 @@
  cross-mips-router-linux-uclibc931: cross-mips-router-linux-uclibc930
  cross-mipsel-fonera2: cross-mips-router-linux-uclibc
  
@@ -540,8 +554,6 @@ Index: Makefile.extra
 -		LIB_DL= STRIP=true \
 -		CROSS=m68k-uclinux- \
 -		$(MAKEFLAGS)
-Index: SoftCam.Key
-===================================================================
 Index: config.h
 ===================================================================
 --- config.h	(revisione 11293)
@@ -694,7 +706,7 @@ Index: csctapi/cardreaders.h
  #endif
 Index: ffdecsa/CMakeLists.txt
 ===================================================================
---- ffdecsa/CMakeLists.txt	(revisione 0)
+--- ffdecsa/CMakeLists.txt	(nonexistent)
 +++ ffdecsa/CMakeLists.txt	(copia locale)
 @@ -0,0 +1,8 @@
 +project (ffdecsa)
@@ -707,7 +719,7 @@ Index: ffdecsa/CMakeLists.txt
 +add_library (${lib_name} STATIC ${ffdecsa_srcs} ${ffdecsa_hdrs})
 Index: ffdecsa/COPYING
 ===================================================================
---- ffdecsa/COPYING	(revisione 0)
+--- ffdecsa/COPYING	(nonexistent)
 +++ ffdecsa/COPYING	(copia locale)
 @@ -0,0 +1,339 @@
 +		    GNU GENERAL PUBLIC LICENSE
@@ -1051,14 +1063,14 @@ Index: ffdecsa/COPYING
 +Public License instead of this License.
 Index: ffdecsa/Makefile
 ===================================================================
---- ffdecsa/Makefile	(revisione 0)
+--- ffdecsa/Makefile	(nonexistent)
 +++ ffdecsa/Makefile	(copia locale)
 @@ -0,0 +1,2 @@
 +parent:
 +	@$(MAKE) --no-print-directory -C ..
 Index: ffdecsa/ffdecsa.c
 ===================================================================
---- ffdecsa/ffdecsa.c	(revisione 0)
+--- ffdecsa/ffdecsa.c	(nonexistent)
 +++ ffdecsa/ffdecsa.c	(copia locale)
 @@ -0,0 +1,926 @@
 +/* FFdecsa -- fast decsa algorithm
@@ -1989,7 +2001,7 @@ Index: ffdecsa/ffdecsa.c
 +}
 Index: ffdecsa/ffdecsa.h
 ===================================================================
---- ffdecsa/ffdecsa.h	(revisione 0)
+--- ffdecsa/ffdecsa.h	(nonexistent)
 +++ ffdecsa/ffdecsa.h	(copia locale)
 @@ -0,0 +1,62 @@
 +/* FFdecsa -- fast decsa algorithm
@@ -2056,7 +2068,7 @@ Index: ffdecsa/ffdecsa.h
 +#endif
 Index: ffdecsa/fftable.h
 ===================================================================
---- ffdecsa/fftable.h	(revisione 0)
+--- ffdecsa/fftable.h	(nonexistent)
 +++ ffdecsa/fftable.h	(copia locale)
 @@ -0,0 +1,56 @@
 +/* FFdecsa -- fast decsa algorithm
@@ -2117,7 +2129,7 @@ Index: ffdecsa/fftable.h
 +#endif //FFTABLE_H 
 Index: ffdecsa/parallel_032_int.h
 ===================================================================
---- ffdecsa/parallel_032_int.h	(revisione 0)
+--- ffdecsa/parallel_032_int.h	(nonexistent)
 +++ ffdecsa/parallel_032_int.h	(copia locale)
 @@ -0,0 +1,55 @@
 +/* FFdecsa -- fast decsa algorithm
@@ -2177,7 +2189,7 @@ Index: ffdecsa/parallel_032_int.h
 +#define M_EMPTY()
 Index: ffdecsa/parallel_064_long.h
 ===================================================================
---- ffdecsa/parallel_064_long.h	(revisione 0)
+--- ffdecsa/parallel_064_long.h	(nonexistent)
 +++ ffdecsa/parallel_064_long.h	(copia locale)
 @@ -0,0 +1,39 @@
 +/* FFdecsa -- fast decsa algorithm
@@ -2221,7 +2233,7 @@ Index: ffdecsa/parallel_064_long.h
 +#include "fftable.h"
 Index: ffdecsa/parallel_128_sse2.h
 ===================================================================
---- ffdecsa/parallel_128_sse2.h	(revisione 0)
+--- ffdecsa/parallel_128_sse2.h	(nonexistent)
 +++ ffdecsa/parallel_128_sse2.h	(copia locale)
 @@ -0,0 +1,82 @@
 +/* FFdecsa -- fast decsa algorithm
@@ -2308,7 +2320,7 @@ Index: ffdecsa/parallel_128_sse2.h
 +#include "fftable.h"
 Index: ffdecsa/parallel_generic.h
 ===================================================================
---- ffdecsa/parallel_generic.h	(revisione 0)
+--- ffdecsa/parallel_generic.h	(nonexistent)
 +++ ffdecsa/parallel_generic.h	(copia locale)
 @@ -0,0 +1,102 @@
 +/* FFdecsa -- fast decsa algorithm
@@ -2415,7 +2427,7 @@ Index: ffdecsa/parallel_generic.h
 +#endif
 Index: ffdecsa/parallel_std_def.h
 ===================================================================
---- ffdecsa/parallel_std_def.h	(revisione 0)
+--- ffdecsa/parallel_std_def.h	(nonexistent)
 +++ ffdecsa/parallel_std_def.h	(copia locale)
 @@ -0,0 +1,29 @@
 +/* FFdecsa -- fast decsa algorithm
@@ -2449,7 +2461,7 @@ Index: ffdecsa/parallel_std_def.h
 +#define B_FFSH8R(a,n) ((a)>>(n))
 Index: ffdecsa/stream.c
 ===================================================================
---- ffdecsa/stream.c	(revisione 0)
+--- ffdecsa/stream.c	(nonexistent)
 +++ ffdecsa/stream.c	(copia locale)
 @@ -0,0 +1,906 @@
 +/* FFdecsa -- fast decsa algorithm
@@ -3620,7 +3632,7 @@ Index: module-dvbapi.h
  struct s_emmpids
 Index: module-emulator-osemu.c
 ===================================================================
---- module-emulator-osemu.c	(revisione 0)
+--- module-emulator-osemu.c	(nonexistent)
 +++ module-emulator-osemu.c	(copia locale)
 @@ -0,0 +1,4707 @@
 +#include "globals.h"
@@ -8332,7 +8344,7 @@ Index: module-emulator-osemu.c
 +}
 Index: module-emulator-osemu.h
 ===================================================================
---- module-emulator-osemu.h	(revisione 0)
+--- module-emulator-osemu.h	(nonexistent)
 +++ module-emulator-osemu.h	(copia locale)
 @@ -0,0 +1,141 @@
 +#include "globals.h"
@@ -8478,7 +8490,7 @@ Index: module-emulator-osemu.h
 +#endif
 Index: module-emulator-stream.c
 ===================================================================
---- module-emulator-stream.c	(revisione 0)
+--- module-emulator-stream.c	(nonexistent)
 +++ module-emulator-stream.c	(copia locale)
 @@ -0,0 +1,1103 @@
 +#include "globals.h"
@@ -9586,7 +9598,7 @@ Index: module-emulator-stream.c
 +}
 Index: module-emulator-stream.h
 ===================================================================
---- module-emulator-stream.h	(revisione 0)
+--- module-emulator-stream.h	(nonexistent)
 +++ module-emulator-stream.h	(copia locale)
 @@ -0,0 +1,75 @@
 +#ifndef EMU_STREAM_SERVER_H_
@@ -9666,7 +9678,7 @@ Index: module-emulator-stream.h
 +#endif
 Index: module-emulator.c
 ===================================================================
---- module-emulator.c	(revisione 0)
+--- module-emulator.c	(nonexistent)
 +++ module-emulator.c	(copia locale)
 @@ -0,0 +1,844 @@
 +#include "globals.h"
@@ -10669,7 +10681,19 @@ Index: module-webif.c
 ===================================================================
 --- module-webif.c	(revisione 11293)
 +++ module-webif.c	(copia locale)
-@@ -78,7 +78,8 @@
+@@ -1,7 +1,11 @@
+ #define MODULE_LOG_PREFIX "webif"
+ 
+ #include "globals.h"
++#ifdef CYGWIN_FREECS
++#include <windows.h>
++#endif 
+ 
++
+ #ifdef WEBIF
+ //
+ // OSCam HTTP server module
+@@ -78,7 +82,8 @@
  #define MNU_CACHEEX		8
  #define MNU_SCRIPT		9
  #define MNU_SHUTDOWN	10
@@ -10679,7 +10703,7 @@ Index: module-webif.c
  
  /* constants for config.html submenuactivating */
  #define MNU_CFG_GLOBAL 		0
-@@ -98,6 +99,7 @@
+@@ -98,6 +103,7 @@
  #define MNU_CFG_LCD			14
  #define MNU_CFG_MONITOR		15
  #define MNU_CFG_WEBIF		16
@@ -10687,7 +10711,7 @@ Index: module-webif.c
  
  /* constants for files.html submenuactivating */
  #define MNU_CFG_FVERSION	0
-@@ -119,8 +121,9 @@
+@@ -119,8 +125,9 @@
  #define MNU_CFG_FCSS		16
  #define MNU_CFG_FTWIN		17
  #define MNU_CFG_FKEYCW 18
@@ -10698,7 +10722,7 @@ Index: module-webif.c
  
  static void set_status_info_var(struct templatevars *vars, char *varname, int no_data, char *fmt, double value) {
  	if (no_data)
-@@ -1059,6 +1062,34 @@
+@@ -1059,6 +1066,34 @@
  }
  #endif
  
@@ -10733,7 +10757,7 @@ Index: module-webif.c
  #ifdef MODULE_CCCAM
  static char *send_oscam_config_cccam(struct templatevars *vars, struct uriparams *params)
  {
-@@ -1474,6 +1505,9 @@
+@@ -1474,6 +1509,9 @@
  #ifdef MODULE_SCAM
  	else if(!strcmp(part, "scam")) { return send_oscam_config_scam(vars, params); }
  #endif
@@ -10743,7 +10767,7 @@ Index: module-webif.c
  #ifdef MODULE_CCCAM
  	else if(!strcmp(part, "cccam")) { return send_oscam_config_cccam(vars, params); }
  #endif
-@@ -1936,7 +1970,7 @@
+@@ -1936,7 +1974,7 @@
  		chk_reader("services", servicelabels, rdr);
  		chk_reader("lb_whitelist_services", servicelabelslb, rdr);
  
@@ -10752,7 +10776,7 @@ Index: module-webif.c
  		{
  			restart_cardreader(rdr, 1);
  		}
-@@ -2508,6 +2542,21 @@
+@@ -2508,6 +2546,21 @@
  	tpl_addVar(vars, TPLADD, "USERSCRIPT", rdr->userscript);
  #endif
  
@@ -10774,7 +10798,7 @@ Index: module-webif.c
  	tpl_addVar(vars, TPLADD, "PROTOCOL", reader_get_type_desc(rdr, 0));
  
  	// Show only parameters which needed for the reader
-@@ -2529,6 +2578,9 @@
+@@ -2529,6 +2582,9 @@
  	case R_CAMD35 :
  		tpl_addVar(vars, TPLAPPEND, "READERDEPENDINGCONFIG", tpl_getTpl(vars, "READERCONFIGCAMD35BIT"));
  		break;
@@ -10784,7 +10808,7 @@ Index: module-webif.c
  	case R_CS378X :
  		tpl_addVar(vars, TPLAPPEND, "READERDEPENDINGCONFIG", tpl_getTpl(vars, "READERCONFIGCS378XBIT"));
  		break;
-@@ -4250,9 +4302,38 @@
+@@ -4250,9 +4306,38 @@
  
  					tpl_addVar(vars, TPLAPPEND, "LOGHISTORY", "<BR><BR>New Structure:<BR>");
  					char tbuffer[83];
@@ -10823,7 +10847,7 @@ Index: module-webif.c
  						localtime_r(&item->start, &start_t);
  						localtime_r(&item->end, &end_t);
  
-@@ -4728,6 +4809,9 @@
+@@ -4728,6 +4813,9 @@
  #else
  						filtered = (type == cl->typ);
  #endif
@@ -10833,7 +10857,7 @@ Index: module-webif.c
  					}
  				}
  
-@@ -5912,6 +5996,198 @@
+@@ -5912,6 +6000,234 @@
  	}
  }
  
@@ -10856,7 +10880,7 @@ Index: module-webif.c
 +{"Help di freecsD, consultalo se hai dubbi", "freecsd.html?scriptname=freecsD&scriptparam=-h", "Help"}, 
 +{"Varie informazioni utili", "freecsd.html?scriptname=freecsD&scriptparam=tools -d", "Info"},
 +{"none", "none", "none"},
-+{"Fill di emergenza. Se avete oscam popolata usate questa anzichè FillIfill unstable", "freecsd.html?scriptname=freecsD&scriptparam=-y0", "Forza handler[Fill di emergenza]"},
++{"Fill di emergenza. Se avete oscam popolata usate questa anzichè FillIfill unstable", "freecsd.html?scriptname=freecsD&scriptparam=-y0", "Forza handler [Fill di emergenza]"},
 +{"none", "none", "none"},
 +{"Aggiunge alcuni nomi eliminati dai DNS servers in /etc/hosts", "freecsd.html?scriptname=freecsD-tools&scriptparam=-p", "Patch /etc/hosts"},
 +{"Popola con la lista stabile di generatori. Da usare solo per popolare la prima volta o quando viene comunicato dai responsabili del progetto", "freecsd.html?scriptname=freecsD&scriptparam=-a", "Fill stable"},
@@ -10869,22 +10893,31 @@ Index: module-webif.c
 +#ifndef FOR_PLUGIN
 +//not needed by enigma2 plugin needed by others
 +{"Controlla se possibile usare freecsD, comunica eventuali problemi e crea un cronjob", "freecsd.html?scriptname=freecsD&scriptparam=-i", "Inizializza"},
++#ifndef CYGWIN_FREECS
 +{"Crea il cronjob con -sy0. Equivale a un fill pulito eseguito ogni 6 minuti", "freecsd.html?scriptname=[newi]", "cronjob con -sy0"},
 +{"Verifica lo stato dei cronjobs (crontab -l)", "freecsd.html?scriptname=crontab&scriptparam=-l", "Verifica cron"},
++#endif
 +#else
 +// needed by enigma2 plugin not needed by others
 +{"Controlla lo stato di oscam-freecsmod e freecsD", "freecsd.html?scriptname=[status]", "Stato"},
 +#endif
 +{"none", "none", "none"},
++#ifndef CYGWIN_FREECS
 +{"Installa freecsD in /usr/bin (/data/local/freecs/bin su android)", "freecsd.html?scriptname=[install]", "Installa freecsD"}, 
 +{"Installa freecsD-tools in /usr/bin (/data/local/freecs/bin su android)", "freecsd.html?scriptname=[install-tools]", "Installa tools"},
++#endif
 +{"none", "none", "none"},
 +#ifdef FOR_PLUGIN
 +{"Aggiorna oscam-freecsmod", "freecsd.html?scriptname=[install-oscam]", "Aggiorna oscam"},
 +#endif
 +#ifndef ANDROID_FREECS
++#ifdef CYGWIN_FREECS
++{"Aggiorna freecsD all'ultima versione", "freecsd.html?scriptname=freecsD-U", "Aggiorna freecsD"},
++{"Aggiorna freecsD-tools all'ultima versione", "freecsd.html?scriptname=freecsD-tools-U", "Aggiorna freecsD-tools"},
++#else
 +{"Aggiorna freecsD all'ultima versione", "freecsd.html?scriptname=freecsD&scriptparam=-U", "Aggiorna freecsD"},
 +{"Aggiorna freecsD-tools all'ultima versione", "freecsd.html?scriptname=freecsD&scriptparam=tools -U", "Aggiorna freecsD-tools"},
++#endif
 +#endif
 +{"none", "none", "none"},
 +#ifndef FOR_PLUGIN_DISABLED
@@ -10924,8 +10957,8 @@ Index: module-webif.c
 +		tpl_addVar(vars, TPLAPPEND, "SCRIPTRESULTOUT", "Oscam freecsmod by <a href=\"http://progettofreecs.altervista.org\">progettofreecs</a>\nPer maggiori informazioni visita il forum <a href=\"http://www.cardsharing.ws/cardsharing/forumdisplay.php/192-FREECS-amp-amp-CO\">cardsharing.ws</a>");
 +		return tpl_getTpl(vars, "FREECSD");
 +	}
-+	if (strcmp (scriptname, "freecsD") && strcmp (scriptname, "freecsD-tools") && strcmp (scriptname, "crontab") && strcmp (scriptname, "[newi]") && strcmp (scriptname, "[install]") && strcmp (scriptname, "[install-tools]") && strcmp (scriptname, "[install-oscam]") && strcmp (scriptname, "[status]") && strcmp (scriptname, "[restart-freecsD]") && strcmp (scriptname, "[restart-oscam]")) {
-+		tpl_addVar(vars, TPLAPPEND, "SCRIPTRESULTOUT", "Impossibile eseguire il comando\nAmmesso solo freecsD per ragioni di sucurezza\n\n");
++	if (strcmp (scriptname, "freecsD") && strcmp (scriptname, "freecsD-U") && strcmp (scriptname, "freecsD-tools") && strcmp (scriptname, "freecsD-tools-U") && strcmp (scriptname, "crontab") && strcmp (scriptname, "[newi]") && strcmp (scriptname, "[install]") && strcmp (scriptname, "[install-tools]") && strcmp (scriptname, "[install-oscam]") && strcmp (scriptname, "[status]") && strcmp (scriptname, "[restart-freecsD]") && strcmp (scriptname, "[restart-oscam]")) {
++		tpl_addVar(vars, TPLAPPEND, "SCRIPTRESULTOUT", "Impossibile eseguire il comando\nAmmesso solo freecsD per ragioni di sicurezza\n\n");
 +		return tpl_getTpl(vars, "FREECSD");
 +	}
 +	if (strcmp (scriptname, "[newi]")) {
@@ -11000,7 +11033,11 @@ Index: module-webif.c
 +#ifdef ANDROID_FREECS
 +	snprintf(system_str, sizeof(system_str), "sh /data/local/freecs/bin/%s", scriptname);
 +#else
++#ifdef CYGWIN_FREECS
++	snprintf(system_str, sizeof(system_str), "start /c C:\\winfreecsD\\bash.exe %s", scriptname);
++#else
 +	snprintf(system_str, sizeof(system_str), "%s", scriptname);
++#endif
 +#endif
 +	}
 +
@@ -11014,13 +11051,36 @@ Index: module-webif.c
 +		strcat(system_str, scriptparam);
 +	}
 +
-+	fp = popen(system_str,"r");
++#ifdef CYGWIN_FREECS
++	strcat(system_str, " > outcmd");
 +
-+	while (fgets(buf, sizeof(buf), fp) != NULL) {
++	SHELLEXECUTEINFO ShExecInfo = {0};
++	ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
++	ShExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
++	ShExecInfo.hwnd = HWND_DESKTOP;
++	ShExecInfo.lpVerb = "open";
++	ShExecInfo.lpFile = "C:\\Windows\\system32\\cmd.exe";		
++	ShExecInfo.lpParameters = system_str;	
++	ShExecInfo.lpDirectory = "C:\\winfreecsD\\";
++	ShExecInfo.nShow = SW_HIDE;
++	ShExecInfo.hInstApp = NULL;	
++	ShellExecuteEx(&ShExecInfo);
++	WaitForSingleObject(ShExecInfo.hProcess,INFINITE);
++
++	fp = fopen("C:\\winfreecsD\\outcmd", "r");
++#else
++	fp = popen(system_str,"r");
++#endif
++
++	while(fgets(buf, sizeof(buf), fp) != NULL) {
 +		tpl_addVar(vars, TPLAPPEND, "SCRIPTRESULTOUT", buf);
 +	}
 +
++#ifdef CYGWIN_FREECS
++	rc = fclose(fp);
++#else
 +	rc = pclose(fp)/256;
++#endif
 +
 +	tpl_printf(vars, TPLAPPEND, "CODE", "returncode: %d", rc);
 +	tpl_printf(vars, TPLADD, "SCRIPTNAME", "%s", scriptname);
@@ -11032,7 +11092,132 @@ Index: module-webif.c
  static char *send_oscam_script(struct templatevars * vars, struct uriparams * params)
  {
  	setActiveMenu(vars, MNU_SCRIPT);
-@@ -6159,6 +6435,9 @@
+@@ -5920,7 +6236,7 @@
+ 	if(!cfg.http_readonly && cfg.http_script)
+ 	{
+ 		struct dirent **namelist;
+-		int count, i;
++		int count, i, is_script = 0, is_windows = 0;
+ 		count = scandir(cfg.http_script, &namelist, 0, alphasort );
+ 		if( count >= 0 )
+ 		{
+@@ -5929,6 +6245,7 @@
+ 				if(is_ext(namelist[i]->d_name, ".script") || is_ext(namelist[i]->d_name, ".sh"))
+ 				{
+ 					tpl_printf(vars, TPLAPPEND, "SCRIPTOPTIONS", "<option value=\"script.html?scriptname=%s\">%s</option>\n",namelist[i]->d_name,namelist[i]->d_name);
++					is_script = 1;
+  				}
+ 				free( namelist[i] );
+ 			}
+@@ -5937,39 +6254,78 @@
+ 
+ 		char *scriptname = getParam(params, "scriptname");
+ 		char *scriptparam = getParam(params, "scriptparam");
++		char *result = "not executable";
+ 		char system_str[256];
+ 		struct stat s;
+-		snprintf(system_str, sizeof(system_str), "%s/%s", cfg.http_script, scriptname);
++#ifdef CYGWIN_FREECS
++		snprintf(system_str, 256, "start /c C:\\winfreecsD\\bash.exe %s/%s", cfg.http_script, scriptname);
++		is_windows = 1;
++#else
++		snprintf(system_str, 256, "%s/%s", cfg.http_script, scriptname);
++#endif
+ 
+-		if(!stat(system_str,&s))
++		if(!stat(system_str,&s) || is_windows == 1)
+ 		{
+-			if(s.st_mode & S_IFREG)
++			if((s.st_mode & S_IFREG) || is_windows == 1)
+ 			{
+-				if(s.st_mode & S_IXUSR)
++				if((s.st_mode & S_IXUSR) || is_windows == 1)
+ 				{
+-					int32_t rc;
++					int32_t rc = 0;
+ 					FILE *fp;
+ 					char buf[256];
+-
+-					if((scriptparam != NULL) && (sizeof(scriptparam) > 0))
++					if (is_script == 1)
+ 					{
+-						strcat(system_str, " ");
+-						strcat(system_str, scriptparam);
+-					}
+-
+-					fp = popen(system_str,"r");
+-
+-					while (fgets(buf, sizeof(buf), fp) != NULL) {
+-						tpl_addVar(vars, TPLAPPEND, "SCRIPTRESULTOUT", buf);
+-					}
+-
+-					rc = pclose(fp)/256;
+-
++					  if((scriptparam != NULL) && (sizeof(scriptparam) > 0))
++					  {
++					  	strcat(system_str, " ");
++					  	strcat(system_str, scriptparam);
++					  }
++            
++#ifdef CYGWIN_FREECS
++							strcat(system_str, " > outcmd");
++							SHELLEXECUTEINFO ShExecInfo = {0};
++							ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
++							ShExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
++							ShExecInfo.hwnd = HWND_DESKTOP;
++							ShExecInfo.lpVerb = "open";
++							ShExecInfo.lpFile = "C:\\Windows\\system32\\cmd.exe";		
++							ShExecInfo.lpParameters = system_str;	
++							ShExecInfo.lpDirectory = "C:\\winfreecsD\\";
++							ShExecInfo.nShow = SW_HIDE;
++							ShExecInfo.hInstApp = NULL;	
++							ShellExecuteEx(&ShExecInfo);
++							WaitForSingleObject(ShExecInfo.hProcess,INFINITE);
++							
++							fp = fopen("C:\\winfreecsD\\outcmd", "r");
++#else
++							fp = popen(system_str,"r");
++#endif
++            
++					  while (fgets(buf, sizeof(buf), fp) != NULL) {
++					  	tpl_addVar(vars, TPLAPPEND, "SCRIPTRESULTOUT", buf);
++					  }
++            
++#ifdef CYGWIN_FREECS
++							rc = fclose(fp);
++#else
++							rc = pclose(fp)/256;
++#endif
++            }
++          else
++          	{
++					  rc = system(system_str);
++					  if(rc == 0){
++					  	result = "done";}
++					  else{
++					  	result = "failed";}
++					  }
+ 					tpl_printf(vars, TPLAPPEND, "CODE", "returncode: %d", rc);
+ 					tpl_printf(vars, TPLADD, "SCRIPTNAME", "scriptname: %s", scriptname);
+-				}
++					tpl_printf(vars, TPLADD, "SCRIPTRESULT", "scriptresult: %s", result);
++					}
+ 				else
+ 				{
++					tpl_printf(vars, TPLADD, "SCRIPTRESULT", "scriptresult: %s", result);
+ 					tpl_printf(vars, TPLADD, "SCRIPTRESULTOUT", "[Error]: Script \"%s\" not executable!", scriptname);
+ 				}
+ 			}
+@@ -5976,6 +6332,8 @@
+ 		}
+ 		else
+ 		{
++			result = "not found";
++			tpl_printf(vars, TPLADD, "SCRIPTRESULT", "scriptresult: %s", result);
+ 			tpl_printf(vars, TPLADD, "SCRIPTRESULTOUT", "[Error]: Script \"%s\" not found!", scriptname);
+ 		}
+ 		
+@@ -6159,6 +6517,9 @@
  #ifdef MODULE_CONSTCW
  		{ "constant.cw",     MNU_CFG_FKEYCW,    FTYPE_CONFIG },     // id 18
  #endif
@@ -11042,7 +11227,7 @@ Index: module-webif.c
  		{ NULL, 0, 0 },
  	};
  
-@@ -6624,7 +6903,7 @@
+@@ -6624,7 +6985,7 @@
  		else if(!proxy && rdr->csystem_active)     // local active reader
  		{
  			csystem = rdr->csystem;
@@ -11051,7 +11236,7 @@ Index: module-webif.c
  		}
  
  		if(csystem)
-@@ -7629,8 +7908,8 @@
+@@ -7629,8 +7990,8 @@
  		memcpy(*result + bufsize, buf2, n);
  		bufsize += n;
  
@@ -11062,7 +11247,7 @@ Index: module-webif.c
  		{
  			cs_log("error: too much data received from %s", cs_inet_ntoa(in));
  			NULLFREE(*result);
-@@ -7730,6 +8009,7 @@
+@@ -7730,6 +8091,7 @@
  			"/ghttp.html",
  			"/logpoll.html",
  			"/jquery.js",
@@ -11070,7 +11255,7 @@ Index: module-webif.c
  		};
  
  		int32_t pagescnt = sizeof(pages) / sizeof(char *); // Calculate the amount of items in array
-@@ -8131,8 +8411,11 @@
+@@ -8131,8 +8493,11 @@
  				result = send_oscam_logpoll(vars, &params);
  				break;
  #endif				
@@ -11503,13 +11688,13 @@ Index: webif/config/menu.html
 \ No newline at end of file
 Index: webif/config/menu_streamrelay.html
 ===================================================================
---- webif/config/menu_streamrelay.html	(revisione 0)
+--- webif/config/menu_streamrelay.html	(nonexistent)
 +++ webif/config/menu_streamrelay.html	(copia locale)
 @@ -0,0 +1 @@
 +			<LI CLASS="##CMENUACTIVE17##"><A HREF="config.html?part=streamrelay">Stream Relay</A></LI>
 Index: webif/config/streamrelay.html
 ===================================================================
---- webif/config/streamrelay.html	(revisione 0)
+--- webif/config/streamrelay.html	(nonexistent)
 +++ webif/config/streamrelay.html	(copia locale)
 @@ -0,0 +1,25 @@
 +		<input name="part" type="hidden" value="streamrelay">
@@ -11561,13 +11746,13 @@ Index: webif/files/menu.html
  	</UL>
 Index: webif/files/menu_softcamkey.html
 ===================================================================
---- webif/files/menu_softcamkey.html	(revisione 0)
+--- webif/files/menu_softcamkey.html	(nonexistent)
 +++ webif/files/menu_softcamkey.html	(copia locale)
 @@ -0,0 +1 @@
 +			<LI CLASS="##CMENUACTIVE19##"><A HREF="files.html?file=SoftCam.Key">SoftCam.Key</A></LI>
 Index: webif/freecsd/freecsd.html
 ===================================================================
---- webif/freecsd/freecsd.html	(revisione 0)
+--- webif/freecsd/freecsd.html	(nonexistent)
 +++ webif/freecsd/freecsd.html	(copia locale)
 @@ -0,0 +1,143 @@
 +##TPLHEADER##
@@ -11778,7 +11963,7 @@ Index: webif/pages_index.txt
 +FREECSD			      freecsd/freecsd.html
 Index: webif/readerconfig/readerconfig_emubit.html
 ===================================================================
---- webif/readerconfig/readerconfig_emubit.html	(revisione 0)
+--- webif/readerconfig/readerconfig_emubit.html	(nonexistent)
 +++ webif/readerconfig/readerconfig_emubit.html	(copia locale)
 @@ -0,0 +1,5 @@
 +			<TR><TD><A>AU providers:</A></TD><TD><textarea name="emu_auproviders" rows="3" class="bt">##EMUAUPROVIDERS##</textarea></TD></TR>
